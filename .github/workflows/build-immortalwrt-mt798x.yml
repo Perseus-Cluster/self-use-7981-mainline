@@ -94,10 +94,15 @@ jobs:
         ./scripts/feeds update -a && ./scripts/feeds install -a        
         chmod +x $GITHUB_WORKSPACE/$DIY_SH && $GITHUB_WORKSPACE/$DIY_SH
 
-    - name: 导入补丁和配置
+- name: 导入补丁和配置
       run: |
         [ -e files ] && mv files openwrt/files
-        cat configs/rax3000m-emmc_mtksdk.config >> openwrt/.config
+        # 使用官方针对 MT7981 的最新标准配置模板
+        cp -f openwrt/defconfig/mt7981-ax3000.config openwrt/.config
+        # 强制开启 kmod-warp 以确保你需要的硬转发增强功能被选中
+        echo "CONFIG_PACKAGE_kmod-warp=y" >> openwrt/.config
+        echo "CONFIG_WARP_CHIPSET=\"mt7981\"" >> openwrt/.config
+        echo "CONFIG_WARP_VERSION=2" >> openwrt/.config
 
     - name: 设置无线控制界面样式
       if: env.USE_MTWIFI_CFG == 'true'
